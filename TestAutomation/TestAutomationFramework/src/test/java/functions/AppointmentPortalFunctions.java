@@ -36,12 +36,7 @@ public class AppointmentPortalFunctions {
 	String expectedTechnikername; 
 	String expectedTechnikeralter; 
 	String expectedTechnikergeschlecht;
-<<<<<<< HEAD
-	
-	//Driver initiliazation in Constructor
-=======
 
->>>>>>> origin/FeatureBranch
 	public AppointmentPortalFunctions(WebDriver driver) {
 		this.driver = driver;
 	}
