@@ -1,0 +1,76 @@
+name: Java Test Automation Framework for CI with Maven
+
+on:
+  # Triggering workflow on pull requests
+  pull_request:
+    branches:
+      - main
+  # Allow manual triggering of the workflow
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest 
+
+    steps:
+    # Step 1: Checkout the latest code from the repository
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    # Step 3: Set up Node.js
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '23.0.0' 
+        
+    # Step 3: Install npm dependencies
+    - name: Install npm dependencies
+      run: npm install
+
+    # Step 4: Setup App
+    - name: Run setup script
+      run: npm run setup
+
+    # Step 5: Start App - client and server
+    - name: Start Vue.js app
+      run: npm run start &
+        echo "Server and client starting..."
+      
+     # Step 6: Wait for Server to be Ready
+    - name: Wait for Server to be Ready
+      run: |
+        count=0
+        until curl --silent --fail http://localhost:8080; do
+          ((count++))
+          if [ $count -ge 60 ]; then  # Increased attempts
+            echo "Server did not start in time."
+            exit 1
+          fi
+          echo "Waiting for server... attempt $count"
+          sleep 5
+        done
+        echo "Server is up!"
+      
+    # Step 7: Set up JDK 23 #can be different version as per requirement
+    - name: Set up JDK 23
+      uses: actions/setup-java@v3
+      with:
+         distribution: 'temurin'
+         java-version: '23'
+         
+    # Step 8: Cache Maven dependencies 
+    - name: Cache Maven dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven-
+
+    # Step 9: Installing project dependencies and building project
+    - name: Build with Maven
+      run: mvn -f TestAutomation/TestAutomationFramework/pom.xml clean install -DskipTests 
+
+    # Step 10: Run the tests
+    - name: Run Selenium tests
+      run: mvn -f TestAutomation/TestAutomationFramework/pom.xml test
