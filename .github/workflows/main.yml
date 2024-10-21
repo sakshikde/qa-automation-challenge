@@ -33,11 +33,13 @@ jobs:
 
     # Step 5: Start App - client and server
     - name: Start Vue.js app
+      shell: bash
       run: npm run start &
         echo "Server and client starting..."
       
      # Step 6: Wait for Server to be Ready
     - name: Wait for Server to be Ready
+      shell: bash
       run: |
         count=0
         until curl --silent --fail http://localhost:8080; do
@@ -74,3 +76,11 @@ jobs:
     # Step 10: Run the tests
     - name: Run Selenium tests
       run: mvn -f TestAutomation/TestAutomationFramework/pom.xml test
+      
+    # Step 11: Upload test reports (HTML and logs)
+    - name: Upload test results
+      if: always()  
+      uses: actions/upload-artifact@v3
+      with:
+          name: test-reports
+          path: TestAutomation/TestAutomationFramework/Reports/
