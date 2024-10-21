@@ -64,7 +64,7 @@ public class TestMethods {
 		}		
 	}
 		
-	@AfterTest
+	@AfterTest //After Test
 	public void afterTest() {
 		driver.quit();
 		reports.CompleteTest();
